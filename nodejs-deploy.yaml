@@ -5,7 +5,7 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    app: contoh
+    app: nodejs
   type: NodePort
   ports:
   - name: nodejs-port
@@ -17,16 +17,16 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: contoh
+  name: nodejs
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: contoh
+      app: nodejs
   template:
     metadata:
       labels:
-        app: contoh
+        app: nodejs
     spec:
       containers:
       - name: contoh
