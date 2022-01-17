@@ -1,0 +1,39 @@
+image: docker:19.03.0-dind
+
+services:
+  - docker:19.03.0-dind
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_HOST: tcp://127.0.0.1:2375
+  DOCKER_TLS_CERTDIR: ""
+
+stages:
+  - build
+  - deploy
+
+docker-build:
+  stage: build
+  tags:
+    - contoh
+  script:
+    - docker build -t $CI_PROJECT_PATH:$CI_COMMIT_SHA .
+    - docker tag $CI_PROJECT_PATH:$CI_COMMIT_SHA $DOCKERHUB_USERNAME/nodejs-example:latest
+    - docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD" $CI_REGISTRY
+    - docker push $DOCKERHUB_USERNAME/nodejs-example:latest
+    - docker logout
+
+kube-deploy:
+  image: alpine:latest
+  stage: deploy
+  tags:
+    - contoh
+  script:
+    - apk update  && apk add --no-cache curl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - mkdir -p $HOME/.kube
+    - echo -n $kube_config | base64 -d > $HOME/.kube/config
+    - kubectl config view
+    - kubectl delete service nodejs-service -n contoh
+    - kubectl delete deployment contoh -n contoh
+    - kubectl create -f  nodejs-deploy.yaml -n contoh
