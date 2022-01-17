@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nodejs-service
+spec:
+  type: ClusterIP
+  selector:
+    app: contoh
+  type: NodePort
+  ports:
+  - name: nodejs-port
+    nodePort: 31111
+    port: 31111
+    targetPort: 3000
+    protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: contoh
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: contoh
+  template:
+    metadata:
+      labels:
+        app: contoh
+    spec:
+      containers:
+      - name: contoh
+        image: paksalman/nodejs-example:latest
+        ports:
+          - containerPort: 3000
