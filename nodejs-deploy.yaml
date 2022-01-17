@@ -29,7 +29,7 @@ spec:
         app: nodejs
     spec:
       containers:
-      - name: contoh
+      - name: nodejs
         image: paksalman/nodejs-example:latest
         ports:
           - containerPort: 3000
